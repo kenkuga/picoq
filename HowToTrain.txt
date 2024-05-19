@@ -1,0 +1,48 @@
+1. Download Coqprojects and install them.
+
+2. Make a coqproject_pathfile
+a text file with each line showing
+the path to the directory of each project
+that contains the _CoqProject file if any.
+
+3. Make the training datafile by calling
+$ python3 coqproj_to_data.py coqproject_pathfile path_to_csv True
+(4th argument defaults to False. If True "Print All." results will be added to training data)
+This gives the csv file path_to_csv
+(in case no _CoqProject/Make file found in a path,
+this tries to compile all *.v files in the project recursively)
+
+4. Train a tokenizer by calling
+>>> from utils import tokenizer_training_generator_from_corpus, tokenizer_train_new
+>>> gen_corpus = tokenizer_training_generator_from_corpus(df_or_csv)
+>>> tokenizer = tokenizer_train_new(model_name, gen_corpus, save_name='tokenizer'):
+where model_name is either t5-small, t5-base, t5-large
+df_or_csv fi5 impfrle is the path_to_csv file produced in step 3 or pd.DataFrame
+Default name of the new tokenizer directory is model_name+"_"+tokenizer
+
+5. get t5coq object 
+>>> from t5coq import T5Coq
+>>> coq = T5Coq()
+and set T5 using the tokenizer by either
+>>> coq.set_t5(model_name, t5_tokenizer_dir)
+or
+>>> coq.set_t5_pretrained(self, model_type="t5", model_name="t5-base")
+
+6. Training & Evaluation
+>>> coq.set_train_data_from_csv(path_to_data_csv)
+>>> coq.model_train(gpu=True/False, outputdir = "outputs",)
+
+7. Load checkpoint example
+>>> coq.load_model("outputs/simplet5-epoch-4-train-loss-0.8944-val-loss-0.8247")
+
+8. Coq command execution with/without prediction
+>>> coq(commands)
+executes coq commands
+>>> list_retdict, list_predictions = coq(commands, num_prediction=2)
+executes coq commands and 
+returns a list of respose dictionaries for all consecutive commands 
+and a list of 2 predictions from the last response.
+(num_prediction now 2, defaults to 0)
+
+
+
